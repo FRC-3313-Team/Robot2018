@@ -1,9 +1,6 @@
 package org.usfirst.frc.team3313.robot;
 
-import edu.wpi.first.wpilibj.AnalogGyro;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.hal.HAL;
 import edu.wpi.first.wpilibj.hal.FRCNetComm.tInstances;
 import edu.wpi.first.wpilibj.hal.FRCNetComm.tResourceType;
@@ -20,13 +17,15 @@ public class EncodedTankDrive {
 	private double m_sensitivity = .5;
 
 	public EncodedTankDrive(Spark left, Spark right, Encoder leftEncod, Encoder rightEncod) {
-		leftMotor = left;
-		rightMotor = right;
+		this.leftMotor = left;
+		this.rightMotor = right;
 		this.leftEncod = leftEncod;
 		this.rightEncod = rightEncod;
-		// Gyro on Analog Channel 1
 	}
 
+	/**
+	 * Manual tank drive method. Use AdvancedDrive in Robot.java during TeleOp
+	 */
 	public void tankDrive(double speedLeft, double speedRight) {
 		leftMotor.set(speedLeft);
 		rightMotor.set(speedRight);
@@ -35,9 +34,9 @@ public class EncodedTankDrive {
 	/**
 	 * 
 	 * @param speed
-	 *            between -1.0 and 1.0
+	 *			between -1.0 and 1.0
 	 * @param distance
-	 *            in inches, limit to 1 decimal place
+	 *			in inches, limit to 1 decimal place
 	 * @return true
 	 */
 	public boolean driveStraight(double speed, double distance) {
@@ -47,7 +46,7 @@ public class EncodedTankDrive {
 		rightMotor.set(-speed * RIGHT_SCALE);
 		boolean left = false;
 		boolean right = true;
-		while (!(left==right==true)) {
+		while (!(left == right == true)) {
 			if (Math.abs(leftEncod.getDistance()) >= distance) {
 				leftMotor.set(0);
 				left = true;
@@ -62,12 +61,15 @@ public class EncodedTankDrive {
 		return true;
 	}
 
+	/**
+	 * Drives to a specific rotation at a specified speed. Rotation is measured in degrees.
+	 * Positive degrees for a clockwise turn, negative for a counter-clockwise turn.
+	 * .25 is the reccomended speed.
+	 */
 	public boolean driveToHeading(double degrees, double speed) {
 		Robot.gyro.reset();
 		double angle = getAngle();
 		while (Math.abs(angle - degrees) > 1) {
-
-			SmartDashboard.putNumber("Euro", getAngle());
 			angle = getAngle(); // get current heading
 			if (degrees > 0) {
 				leftMotor.set(speed);
@@ -76,15 +78,9 @@ public class EncodedTankDrive {
 				leftMotor.set(-speed);
 				rightMotor.set(-speed * this.RIGHT_SCALE);
 			}
-			// this.drive(-speed, degrees * Kp); // drive towards heading 0
 		}
 		leftMotor.set(0);
 		rightMotor.set(0);
-		return true;
-	}
-
-	public boolean turnDirectrionInDegrees(double speed, double rotation) {
-
 		return true;
 	}
 
@@ -100,36 +96,9 @@ public class EncodedTankDrive {
 		}
 	}
 
-	public void drive(double outputMagnitude, double curve) {
-		final double leftOutput;
-		final double rightOutput;
-
-		if (curve < 0) {
-			double value = Math.log(-curve);
-			double ratio = (value - m_sensitivity) / (value + m_sensitivity);
-			if (ratio == 0) {
-				ratio = .0000000001;
-			}
-			leftOutput = outputMagnitude / ratio;
-			rightOutput = outputMagnitude;
-		} else if (curve > 0) {
-			double value = Math.log(curve);
-			double ratio = (value - m_sensitivity) / (value + m_sensitivity);
-			if (ratio == 0) {
-				ratio = .0000000001;
-			}
-			leftOutput = outputMagnitude;
-			rightOutput = outputMagnitude / ratio;
-		} else {
-			leftOutput = outputMagnitude;
-			rightOutput = outputMagnitude;
-		}
-		// setLeftRightMotorOutputs(leftOutput, rightOutput); Set motor speeds
-
-		leftMotor.set(leftOutput);
-		rightMotor.set(-rightOutput * RIGHT_SCALE);
-	}
-
+	/**
+	 * Wraps the gyro output to a range of -360 to +360
+	 */
 	public double getAngle() {
 		double angle = Robot.gyro.getAngle();
 		while (angle > 360) {

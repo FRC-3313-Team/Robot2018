@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
+/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.						*/
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
+/* the project.															   */
 /*----------------------------------------------------------------------------*/
 
 package org.usfirst.frc.team3313.robot;
@@ -39,15 +39,16 @@ public class Robot extends IterativeRobot {
 	Joystick controller = new Joystick(0);
 	Joystick funcJoystick = new Joystick(1);
 
+	//Gyro that is attached directly to the RIO
 	static ADXRS450_Gyro gyro;
 
 	// Talons
-	Talon T3 = new Talon(3);// Stage 2 lift
-	Talon T4 = new Talon(4);// Stage 1 lift
-	Talon T5 = new Talon(5);// Intake L
-	Talon T6 = new Talon(6);// Intake R
-	Talon T7 = new Talon(7);// Intake Tilt
-	Servo tom = new Servo(0);// Controls the stroller handle servo
+	Talon T3 = new Talon(3); // Stage 2 lift
+	Talon T4 = new Talon(4); // Stage 1 lift
+	Talon T5 = new Talon(5); // Intake L
+	Talon T6 = new Talon(6); // Intake R
+	Talon T7 = new Talon(7); // Intake Tilt
+	Servo tom = new Servo(0); // Controls the stroller handle servo
 
 	// Accelerated Movement May or may not work IDK
 	double incrementSpeed = 0; // DO NOT TOUCH
@@ -107,22 +108,15 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		first = true;
 		tom.setAngle(0);
-		// drive.driveToHeading(90, .25);
 		drive.driveStraight(.25, 12); // Drive straight for speed, distance
 		tom.setAngle(180);
 		drive.driveToHeading(90, .25);
 		drive.driveStraight(.25, 24);
 	}
 
-	boolean first = true;
-
 	@Override
 	public void autonomousPeriodic() {
 		while (isAutonomous()) {
-
-		}
-		if (first) {
-			first = false;
 
 		}
 	}
@@ -222,10 +216,10 @@ public class Robot extends IterativeRobot {
 					drive.tankDrive(respectedValue + (-leftStick / 2), respectedValue + (leftStick / 2));
 				} else {
 					drive.tankDrive((incrementSpeed * currentSpeed) + (-leftStick / 2),
-							(incrementSpeed * currentSpeed) + -(-leftStick / 2));
+						(incrementSpeed * currentSpeed) + (leftStick / 2));
 				}
 			} else {
-				drive.tankDrive(respectedValue + (-leftStick / 2), respectedValue + -(-leftStick / 2));
+				drive.tankDrive(respectedValue + (-leftStick / 2), respectedValue + (leftStick / 2));
 			}
 			// double acclerationValue = (respectedValue / ticksTillFullSpeed) *
 			// currentSpeed;
@@ -236,6 +230,5 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during test mode.
 	 */
 	@Override
-	public void testPeriodic() {
-	}
+	public void testPeriodic() {}
 }
