@@ -7,22 +7,9 @@
 
 package org.usfirst.frc.team3313.robot;
 
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Joystick.AxisType;
-import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Spark;
-
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
-
-import edu.wpi.cscore.CvSink;
-import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.DigitalInput;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -38,7 +25,7 @@ public class Robot extends IterativeRobot {
 	// public final int listenPort = 1180;
 
 	// Encoder stuff
-	Encoder ecodRight = new Encoder(9, 8, false, Encoder.EncodingType.k4X);
+	Encoder ecodRight = new Encoder(9, 8, true, Encoder.EncodingType.k1X);
 	Encoder ecodLeft = new Encoder(7, 6, false, Encoder.EncodingType.k1X);
 	// Digital Channel Port, Digital Channel Port, invert, ignore
 
@@ -52,12 +39,15 @@ public class Robot extends IterativeRobot {
 	Joystick controller = new Joystick(0);
 	Joystick funcJoystick = new Joystick(1);
 
+	static ADXRS450_Gyro gyro;
+
 	// Talons
 	Talon T3 = new Talon(3);// Stage 2 lift
 	Talon T4 = new Talon(4);// Stage 1 lift
 	Talon T5 = new Talon(5);// Intake L
 	Talon T6 = new Talon(6);// Intake R
 	Talon T7 = new Talon(7);// Intake Tilt
+	Servo tom = new Servo(0);// Controls the stroller handle servo
 
 	// Accelerated Movement May or may not work IDK
 	double incrementSpeed = 0; // DO NOT TOUCH
@@ -89,10 +79,12 @@ public class Robot extends IterativeRobot {
 		stage2UpLimit = new DigitalInput(3);
 		stage2DownLimit = new DigitalInput(2);
 		// Magic numbers - just ignore this
-		//double x = new Float(.05236111111);			
+		// double x = new Float(.05236111111);
 		this.ecodLeft.setDistancePerPulse(.05236111111);
-		this.ecodRight.setDistancePerPulse(.05236111111); //.05236111111
+		this.ecodRight.setDistancePerPulse(.05236111111); // .05236111111
 
+		gyro = new ADXRS450_Gyro();
+		gyro.reset();
 		// ShuffleBoard Stuff
 
 		// Autonomous Stuff
@@ -114,17 +106,30 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		first = true;
+		tom.setAngle(0);
+		// drive.driveToHeading(90, .25);
+		drive.driveStraight(.25, 12); // Drive straight for speed, distance
+		tom.setAngle(180);
+		drive.driveToHeading(90, .25);
+		drive.driveStraight(.25, 24);
 	}
 
+	boolean first = true;
 
-	boolean first = true; 
-	
 	@Override
 	public void autonomousPeriodic() {
+		while (isAutonomous()) {
+
+		}
 		if (first) {
 			first = false;
-			drive.driveStraight(.25, 12); //Drive straight for speed, distance
+
 		}
+	}
+
+	@Override
+	public void teleopInit() {
+		tom.set(20);
 	}
 
 	/**
@@ -143,6 +148,8 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putBoolean("Stage two: Down", stage2DownLimit.get());
 		SmartDashboard.putNumber("Left Pulses", ecodLeft.get());
 		SmartDashboard.putNumber("Right Pulses", ecodRight.get());
+		SmartDashboard.putNumber("Euro", drive.getAngle());
+		SmartDashboard.putNumber("Tom Servo", tom.getAngle());
 
 		// Intake
 		if (controller.getRawButton(6)) {
@@ -156,15 +163,14 @@ public class Robot extends IterativeRobot {
 			T6.set(0);
 		}
 		// Tilt
-		if(funcJoystick.getRawButton(7)) {
+		if (funcJoystick.getRawButton(7)) {
 			T7.set(.5);
-		}else if(funcJoystick.getRawButton(6)) {
+		} else if (funcJoystick.getRawButton(6)) {
 			T7.set(-.5);
-		}else {
+		} else {
 			T7.set(0);
-		
-			}
-		
+
+		}
 
 		// Stage one lift
 		if (funcJoystick.getRawButton(3) && stage1UpLimit.get()) { // Digital Input 0
@@ -184,8 +190,13 @@ public class Robot extends IterativeRobot {
 			T3.set(0); // Change this value as needed to hold power in the motor
 		}
 
+		if (funcJoystick.getRawButton(10)) {
+			tom.setAngle(180);
+		}
+
 	}
-//FIX DEADZONES
+
+	// FIX DEADZONES
 	private void advancedDrive(double rightStick, double leftStick) {
 		// rightStick uses Y axis, leftStick uses rawAxis(5)
 		if (rightStick == 0 && leftStick == 0) {
@@ -197,7 +208,7 @@ public class Robot extends IterativeRobot {
 			}
 			return;
 		}
-		rightStick = -rightStick; // Invert
+		rightStick = -rightStick * .5; // Invert
 		if (respectMax) {
 			double respectedValue = ((rightStick / 100) * maxSpeed); // New Respected speed
 			// if (controller.getRawButton(5)) { // Ignore the advanced drive
@@ -208,7 +219,7 @@ public class Robot extends IterativeRobot {
 			if (currentSpeed != ticksTillFullSpeed) {
 				currentSpeed++; // Calculate the next tick speed based off maxSpeed / ticksTillFullSpeed
 				if (respectedValue <= (incrementSpeed * currentSpeed)) {
-					drive.tankDrive(respectedValue + (-leftStick / 2), respectedValue + -(-leftStick / 2));
+					drive.tankDrive(respectedValue + (-leftStick / 2), respectedValue + (leftStick / 2));
 				} else {
 					drive.tankDrive((incrementSpeed * currentSpeed) + (-leftStick / 2),
 							(incrementSpeed * currentSpeed) + -(-leftStick / 2));
