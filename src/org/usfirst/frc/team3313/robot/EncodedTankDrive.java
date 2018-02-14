@@ -1,20 +1,14 @@
 package org.usfirst.frc.team3313.robot;
 
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.hal.HAL;
-import edu.wpi.first.wpilibj.hal.FRCNetComm.tInstances;
-import edu.wpi.first.wpilibj.hal.FRCNetComm.tResourceType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class EncodedTankDrive {
 	private Spark leftMotor;
 	private Spark rightMotor;
 	private Encoder leftEncod;
 	private Encoder rightEncod;
-	private double aproximationLimiter = 0;
 	private double RIGHT_SCALE = .978;
 	double Kp = 0.03;
-	private double m_sensitivity = .5;
 
 	public EncodedTankDrive(Spark left, Spark right, Encoder leftEncod, Encoder rightEncod) {
 		this.leftMotor = left;
@@ -34,9 +28,9 @@ public class EncodedTankDrive {
 	/**
 	 * 
 	 * @param speed
-	 *			between -1.0 and 1.0
+	 *            between -1.0 and 1.0
 	 * @param distance
-	 *			in inches, limit to 1 decimal place
+	 *            in inches, limit to 1 decimal place
 	 * @return true
 	 */
 	public boolean driveStraight(double speed, double distance) {
@@ -51,20 +45,23 @@ public class EncodedTankDrive {
 				leftMotor.set(0);
 				left = true;
 			}
-			//if (Math.abs(rightEncod.getDistance()) >= distance) {
-			//	rightMotor.set(0);
-			//	right = true;
-			//}
+			// if (Math.abs(rightEncod.getDistance()) >= distance) {
+			// rightMotor.set(0);
+			// right = true;
+			// }
 		}
 		leftMotor.set(0);
 		rightMotor.set(0);
+
+		while (!this.leftEncod.getStopped() && !rightEncod.getStopped()) {
+		}
 		return true;
 	}
 
 	/**
-	 * Drives to a specific rotation at a specified speed. Rotation is measured in degrees.
-	 * Positive degrees for a clockwise turn, negative for a counter-clockwise turn.
-	 * .25 is the reccomended speed.
+	 * Drives to a specific rotation at a specified speed. Rotation is measured in
+	 * degrees. Positive degrees for a clockwise turn, negative for a
+	 * counter-clockwise turn. .25 is the recommended speed.
 	 */
 	public boolean driveToHeading(double degrees, double speed) {
 		Robot.gyro.reset();
@@ -81,19 +78,9 @@ public class EncodedTankDrive {
 		}
 		leftMotor.set(0);
 		rightMotor.set(0);
-		return true;
-	}
-
-	public void setAproximationLimiter(double d) {
-		aproximationLimiter = d;
-	}
-
-	private boolean appox(double trueValue, double valueToAproximate) {
-		if ((Math.abs(valueToAproximate - trueValue)) <= this.aproximationLimiter) {
-			return true;
-		} else {
-			return false;
+		while (!this.leftEncod.getStopped() && !rightEncod.getStopped()) {
 		}
+		return true;
 	}
 
 	/**

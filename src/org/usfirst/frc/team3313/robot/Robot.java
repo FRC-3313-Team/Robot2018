@@ -8,7 +8,7 @@
 package org.usfirst.frc.team3313.robot;
 
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.*;
 import edu.wpi.cscore.UsbCamera;
 
 /**
@@ -25,12 +25,12 @@ public class Robot extends IterativeRobot {
 	// public final int listenPort = 1180;
 
 	// Encoder stuff
-	Encoder ecodRight = new Encoder(9, 8, true, Encoder.EncodingType.k1X);
-	Encoder ecodLeft = new Encoder(7, 6, false, Encoder.EncodingType.k1X);
+	Encoder encodeRight = new Encoder(9, 8, true, Encoder.EncodingType.k1X);
+	Encoder encodeLeft = new Encoder(7, 6, false, Encoder.EncodingType.k1X);
 	// Digital Channel Port, Digital Channel Port, invert, ignore
 
 	// Drive
-	EncodedTankDrive drive = new EncodedTankDrive(new Spark(8), new Spark(9), ecodLeft, ecodRight);
+	EncodedTankDrive drive = new EncodedTankDrive(new Spark(8), new Spark(9), encodeLeft, encodeRight);
 
 	// Limit Switch
 	DigitalInput stage1UpLimit, stage1DownLimit, stage2UpLimit, stage2DownLimit;
@@ -39,16 +39,16 @@ public class Robot extends IterativeRobot {
 	Joystick controller = new Joystick(0);
 	Joystick funcJoystick = new Joystick(1);
 
-	//Gyro that is attached directly to the RIO
+	// Gyro that is attached directly to the RIO
 	static ADXRS450_Gyro gyro;
 
 	// Talons
-	Talon T3 = new Talon(3); // Stage 2 lift
-	Talon T4 = new Talon(4); // Stage 1 lift
-	Talon T5 = new Talon(5); // Intake L
-	Talon T6 = new Talon(6); // Intake R
-	Talon T7 = new Talon(7); // Intake Tilt
-	Servo tom = new Servo(0); // Controls the stroller handle servo
+	Talon stage2 = new Talon(3); // Stage 2 lift
+	Talon stage1 = new Talon(4); // Stage 1 lift
+	Talon intakeL = new Talon(5); // Intake L
+	Talon intakeR = new Talon(6); // Intake R
+	Talon tilt = new Talon(7); // Intake Tilt
+	Servo barHolder = new Servo(0); // Controls the stroller handle servo
 
 	// Accelerated Movement May or may not work IDK
 	double incrementSpeed = 0; // DO NOT TOUCH
@@ -62,6 +62,13 @@ public class Robot extends IterativeRobot {
 	// speed versus
 	// End
 
+	private SendableChooser<Integer> autoChoosePosition = new SendableChooser<>();
+	private int selectedAutoPosition;
+	private SendableChooser<Integer> autoChooseDistance = new SendableChooser<>();
+	private int selectedAutoDistance;
+
+	private DriverStation ds = DriverStation.getInstance();
+
 	/**
 	 * This function is run when the robot is first started up and should be used
 	 * for any initialization code.
@@ -69,6 +76,15 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		drive.tankDrive(0, 0);
+
+		autoChoosePosition.addDefault("Position 1 Auto", 1);
+		autoChoosePosition.addObject("Position 2 Auto", 2);
+		SmartDashboard.putData("Auto Position", autoChoosePosition);
+
+		autoChooseDistance.addDefault("Auto to Switch", 1);
+		autoChooseDistance.addObject("Auto to Scale", 2);
+		SmartDashboard.putData("Auto Distance", autoChooseDistance);
+
 		// Camera
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(640, 480);
@@ -81,8 +97,8 @@ public class Robot extends IterativeRobot {
 		stage2DownLimit = new DigitalInput(2);
 		// Magic numbers - just ignore this
 		// double x = new Float(.05236111111);
-		this.ecodLeft.setDistancePerPulse(.05236111111);
-		this.ecodRight.setDistancePerPulse(.05236111111); // .05236111111
+		this.encodeLeft.setDistancePerPulse(.05236111111);
+		this.encodeRight.setDistancePerPulse(.05236111111); // .05236111111
 
 		gyro = new ADXRS450_Gyro();
 		gyro.reset();
@@ -106,24 +122,152 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		first = true;
-		tom.setAngle(0);
-		drive.driveStraight(.25, 12); // Drive straight for speed, distance
-		tom.setAngle(180);
-		drive.driveToHeading(90, .25);
-		drive.driveStraight(.25, 24);
+		selectedAutoPosition = autoChoosePosition.getSelected();
+		selectedAutoDistance = autoChooseDistance.getSelected();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
-		while (isAutonomous()) {
+		while (ds.getGameSpecificMessage() == null) {
 
+		}
+
+		tilt.set(-.75);
+		Timer.delay(.2);
+		tilt.set(.3);
+
+		String message = ds.getGameSpecificMessage();
+		char switchSide = message.charAt(0);
+		char scaleSide = message.charAt(1);
+		if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
+			if (selectedAutoDistance == 1) {// If we want to target the switch
+				if (switchSide == 'R') {// If our color is on the right
+					drive.driveStraight(.50, 150);
+					drive.driveToHeading(-90, .25);
+					this.stage2.set(1);
+					while (this.stage2UpLimit.get()) {
+					}
+					stage2.set(0);
+					//drive.driveStraight(.25, 20);
+					autoShoot();
+				} else {// If our color is on the left
+					drive.driveStraight(.25, 181);
+					drive.driveToHeading(-90, .25);
+					drive.driveStraight(.25, 175);
+					drive.driveToHeading(-90, .25);
+					// TODO maybe drive forward a few inches
+					this.stage2.set(.5);
+					while (this.stage2UpLimit.get()) {
+					}
+					
+					stage2.set(0);
+					drive.driveStraight(.25, 20);
+					autoShoot();
+				}
+			} else {// If we want to target the scale
+				if (scaleSide == 'R') {// If out color is on the right
+					drive.driveStraight(.55, 261.47);
+					drive.driveToHeading(-45, .25);
+					stage1.set(.5);
+					while (this.stage1UpLimit.get()) {
+					}
+					stage1.set(0);
+					this.stage2.set(.5);
+					while (this.stage2UpLimit.get()) {
+					}
+					stage2.set(0);
+					autoShoot();
+				}else {//If our color is on the left
+					drive.driveStraight(.5, 181);
+					drive.driveToHeading(-90, .25);
+					drive.driveStraight(.25, 193);
+					drive.driveToHeading(90, .25);
+					drive.driveStraight(.25, 18);
+					stage1.set(.5);
+					while (this.stage1UpLimit.get()) {
+					}
+					stage1.set(0);
+					this.stage2.set(.5);
+					while (this.stage2UpLimit.get()) {
+					}
+					stage2.set(0);
+					autoShoot();										
+				}
+			}
+		}else {
+			if (selectedAutoDistance == 1) {// If we want to target the switch DONE
+				if (switchSide == 'L') {// If our color is on the left
+					drive.driveStraight(.50, 150);
+					drive.driveToHeading(90, .25);
+					this.stage2.set(1);
+					while (this.stage2UpLimit.get()) {
+					}
+					stage2.set(0);
+					//drive.driveStraight(.25, 20);
+					autoShoot();
+				} else {// If our color is on the right
+					drive.driveStraight(.5, 200);
+					drive.driveToHeading(90, .25);
+					drive.driveStraight(.5, 100);
+					drive.driveToHeading(90, .25);
+					// TODO maybe drive forward a few inches
+					this.stage2.set(.5);
+					while (this.stage2UpLimit.get()) {
+					}
+					stage2.set(0);
+					drive.driveStraight(.25, 20);
+					//autoShoot();
+				}
+			} else {// If we want to target the scale
+				if (scaleSide == 'L') {// If out color is on the left
+					drive.driveStraight(.55, 261.47);
+					drive.driveToHeading(45, .25);
+					stage1.set(.5);
+					while (this.stage1UpLimit.get()) {
+					}
+					stage1.set(0);
+					this.stage2.set(.5);
+					while (this.stage2UpLimit.get()) {
+					}
+					stage2.set(0);
+					autoShoot();
+				}else {//If our color is on the right
+					drive.driveStraight(.5, 181);
+					drive.driveToHeading(90, .25);
+					drive.driveStraight(.25, 193);
+					drive.driveToHeading(-90, .25);
+					drive.driveStraight(.25, 18);
+					stage1.set(.5);
+					while (this.stage1UpLimit.get()) {
+					}
+					stage1.set(0);
+					this.stage2.set(.5);
+					while (this.stage2UpLimit.get()) {
+					}
+					stage2.set(0);
+					autoShoot();										
+				}
+			}
+		}
+		while (isAutonomous()) {
 		}
 	}
 
 	@Override
 	public void teleopInit() {
-		tom.set(20);
+		barHolder.set(0);
+	}
+
+	/**
+	 * Used to shoot in auto
+	 */
+	public void autoShoot() {
+		intakeL.set(-.5);
+		intakeR.set(-.5);
+		Timer.delay(.25);
+		intakeL.set(0);
+		intakeR.set(0);
+		tilt.set(0);
 	}
 
 	/**
@@ -134,58 +278,57 @@ public class Robot extends IterativeRobot {
 
 		// Button map: A-1 B-2 X-3 Y-4 BumperR-5 BumperL-6 Back-7 Start-8
 		this.advancedDrive(-controller.getX(), controller.getRawAxis(5));
-		// this.advancedDrive(controller.getY(), controller.getRawAxis(4));
 		// Shuffleboard
 		SmartDashboard.putBoolean("Stage one: Up", stage1UpLimit.get());
 		SmartDashboard.putBoolean("Stage one: Down", stage1DownLimit.get());
 		SmartDashboard.putBoolean("Stage two: Up", stage2UpLimit.get());
 		SmartDashboard.putBoolean("Stage two: Down", stage2DownLimit.get());
-		SmartDashboard.putNumber("Left Pulses", ecodLeft.get());
-		SmartDashboard.putNumber("Right Pulses", ecodRight.get());
+		SmartDashboard.putNumber("Left Pulses", encodeLeft.get());
+		SmartDashboard.putNumber("Right Pulses", encodeRight.get());
 		SmartDashboard.putNumber("Euro", drive.getAngle());
-		SmartDashboard.putNumber("Tom Servo", tom.getAngle());
+		SmartDashboard.putNumber("Tom Servo", barHolder.getAngle());
 
 		// Intake
 		if (controller.getRawButton(6)) {
-			T5.set(1);
-			T6.set(1);
+			intakeL.set(1);
+			intakeR.set(1);
 		} else if (controller.getRawButton(5)) {
-			T5.set(-1);
-			T6.set(-1);
+			intakeL.set(-1);
+			intakeR.set(-1);
 		} else {
-			T5.set(0);
-			T6.set(0);
+			intakeL.set(0);
+			intakeR.set(0);
 		}
 		// Tilt
 		if (funcJoystick.getRawButton(7)) {
-			T7.set(.5);
+			tilt.set(.5);
 		} else if (funcJoystick.getRawButton(6)) {
-			T7.set(-.5);
+			tilt.set(-.5);
 		} else {
-			T7.set(0);
+			tilt.set(0);
 
 		}
 
 		// Stage one lift
 		if (funcJoystick.getRawButton(3) && stage1UpLimit.get()) { // Digital Input 0
-			T4.set(-1); // Up
+			stage1.set(-1); // Up
 		} else if (funcJoystick.getRawButton(2) && stage1DownLimit.get()) { // Digital Input 2
-			T4.set(1); // Down
+			stage1.set(1); // Down
 		} else {
-			T4.set(.15); // Change this value as needed to hold power in the motor
+			stage1.set(.15); // Change this value as needed to hold power in the motor
 		}
 
 		// Stage two lift
 		if (funcJoystick.getRawButton(4) && stage2UpLimit.get()) { // Digital Output 3
-			T3.set(1); // Up
+			stage2.set(1); // Up
 		} else if (funcJoystick.getRawButton(5) && stage2DownLimit.get()) {
-			T3.set(-.6); // Down
+			stage2.set(-.6); // Down
 		} else {
-			T3.set(0); // Change this value as needed to hold power in the motor
+			stage2.set(0); // Change this value as needed to hold power in the motor
 		}
 
 		if (funcJoystick.getRawButton(10)) {
-			tom.setAngle(180);
+			barHolder.setAngle(180);
 		}
 
 	}
@@ -216,7 +359,7 @@ public class Robot extends IterativeRobot {
 					drive.tankDrive(respectedValue + (-leftStick / 2), respectedValue + (leftStick / 2));
 				} else {
 					drive.tankDrive((incrementSpeed * currentSpeed) + (-leftStick / 2),
-						(incrementSpeed * currentSpeed) + (leftStick / 2));
+							(incrementSpeed * currentSpeed) + (leftStick / 2));
 				}
 			} else {
 				drive.tankDrive(respectedValue + (-leftStick / 2), respectedValue + (leftStick / 2));
@@ -230,5 +373,6 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during test mode.
 	 */
 	@Override
-	public void testPeriodic() {}
+	public void testPeriodic() {
+	}
 }
