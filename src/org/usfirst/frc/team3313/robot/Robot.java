@@ -108,14 +108,7 @@ public class Robot extends IterativeRobot {
     /**
      * This autonomous (along with the chooser code above) shows how to select
      * between different autonomous modes using the dashboard. The sendable
-     * chooser code works with the Java SmartDashboard. If you prefer the
-     * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-     * getString line to get the auto name from the text box below the Gyro
-     *
-     * <p>
-     * You can add additional auto modes by adding additional comparisons to the
-     * switch structure below with additional strings. If using the
-     * SendableChooser make sure to add them to the chooser code above as well.
+     * chooser code works with the Java SmartDashboard.
      */
     @Override
     public void autonomousInit() {
@@ -213,11 +206,6 @@ public class Robot extends IterativeRobot {
         }
     }
 
-    @Override
-    public void teleopInit() {
-        barHolder.set(0);
-    }
-
     /**
      * Used to shoot in auto
      */
@@ -242,6 +230,11 @@ public class Robot extends IterativeRobot {
         while (stage1UpLimit.get()) {
         }
         stage1.set(0);
+    }
+
+    @Override
+    public void teleopInit() {
+        barHolder.set(0);
     }
 
     /**
@@ -307,6 +300,13 @@ public class Robot extends IterativeRobot {
 
     }
 
+    /**
+     * This function is called periodically during test mode.
+     */
+    @Override
+    public void testPeriodic() {
+    }
+
     // FIX DEADZONES
     private void advancedDrive(double rightStick, double leftStick) {
         // rightStick uses Y axis, leftStick uses rawAxis(5)
@@ -341,12 +341,5 @@ public class Robot extends IterativeRobot {
             // double acclerationValue = (respectedValue / ticksTillFullSpeed) *
             // currentSpeed;
         }
-    }
-
-    /**
-     * This function is called periodically during test mode.
-     */
-    @Override
-    public void testPeriodic() {
     }
 }
