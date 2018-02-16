@@ -253,7 +253,6 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Euro", drive.getAngle());
 
 		double joyZ = (funcJoystick.getZ() * -0.5) + 0.5;
-		SmartDashboard.putNumber("ATK Z", joyZ);
 		// Intake
 		if (controller.getRawButton(6)) {
 			intakeL.set(joyZ);
