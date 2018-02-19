@@ -9,6 +9,7 @@ package org.usfirst.frc.team3313.robot;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.*;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -47,6 +48,9 @@ public class Robot extends IterativeRobot {
 	Talon intakeR = new Talon(6); // Intake R
 	Talon tilt = new Talon(7); // Intake Tilt
 
+	// Servos
+	Servo drop = new Servo(0);
+
 	// Accelerated Movement May or may not work IDK
 	double incrementSpeed = 0; // DO NOT TOUCH
 	int currentSpeed = 0; // DO NOT TOUCH
@@ -76,15 +80,17 @@ public class Robot extends IterativeRobot {
 
 		autoChoosePosition.addDefault("Position 1 Auto", 1);
 		autoChoosePosition.addObject("Position 2 Auto", 2);
+		autoChoosePosition.addObject("Drive Forward", 3);
 		SmartDashboard.putData("Auto Position", autoChoosePosition);
 
 		autoChooseDistance.addDefault("Auto to Switch", 1);
 		autoChooseDistance.addObject("Auto to Scale", 2);
+		autoChooseDistance.addObject("Drive Forward", 3);
 		SmartDashboard.putData("Auto Distance", autoChooseDistance);
 
 		// Camera
-		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-		camera.setResolution(640, 480);
+		// UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+		// camera.setResolution(640, 480);
 		// CameraServer.getInstance().startAutomaticCapture();
 
 		// Limit Switch
@@ -100,7 +106,6 @@ public class Robot extends IterativeRobot {
 		gyro = new ADXRS450_Gyro();
 		gyro.reset();
 		// ShuffleBoard Stuff
-
 		// Autonomous Stuff
 	}
 
@@ -113,13 +118,6 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		selectedAutoPosition = autoChoosePosition.getSelected();
 		selectedAutoDistance = autoChooseDistance.getSelected();
-	}
-
-	@Override
-	public void autonomousPeriodic() {
-		while (ds.getGameSpecificMessage() == null) {
-
-		}
 
 		tilt.set(-.75);
 		Timer.delay(.2);
@@ -128,6 +126,7 @@ public class Robot extends IterativeRobot {
 		String message = ds.getGameSpecificMessage();
 		char switchSide = message.charAt(0);
 		char scaleSide = message.charAt(1);
+
 		if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
 			if (selectedAutoDistance == 1) {// If we want to target the switch
 				if (switchSide == 'R') {// If our color is on the right
@@ -201,8 +200,11 @@ public class Robot extends IterativeRobot {
 				}
 			}
 		}
-		while (isAutonomous()) {
-		}
+	}
+
+	@Override
+	public void autonomousPeriodic() {
+
 	}
 
 	/**
@@ -251,13 +253,15 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Left Pulses", encodeLeft.get());
 		SmartDashboard.putNumber("Right Pulses", encodeRight.get());
 		SmartDashboard.putNumber("Euro", drive.getAngle());
+		SmartDashboard.putString("Game Message", ds.getGameSpecificMessage());
+		SmartDashboard.putNumber("ATK Z", -funcJoystick.getZ());
 
 		double joyZ = (funcJoystick.getZ() * -0.5) + 0.5;
 		// Intake
 		if (controller.getRawButton(6)) {
 			intakeL.set(joyZ);
 			intakeR.set(joyZ);
-		} else if (controller.getRawButton(5))  {
+		} else if (controller.getRawButton(5)) {
 			intakeL.set(-joyZ);
 			intakeR.set(-joyZ);
 		} else {
@@ -270,7 +274,7 @@ public class Robot extends IterativeRobot {
 		} else if (funcJoystick.getRawButton(4)) {
 			tilt.set(-.5);
 		} else {
-			tilt.set(0);
+			tilt.set(0.1);
 
 		}
 
@@ -280,7 +284,11 @@ public class Robot extends IterativeRobot {
 		} else if (funcJoystick.getRawButton(7) && stage1DownLimit.get()) { // Digital Input 2
 			stage1.set(1); // Down
 		} else {
-			stage1.set(.15); // Change this value as needed to hold power in the motor
+			if (stage1DownLimit.get()) {
+				stage1.set(0.15); // Change this value as needed to hold power in the motor
+			}else {
+				stage1.set(0);
+			}
 		}
 
 		// Stage two lift
@@ -290,6 +298,15 @@ public class Robot extends IterativeRobot {
 			stage2.set(-.6); // Down
 		} else {
 			stage2.set(0); // Change this value as needed to hold power in the motor
+		}
+
+		// Drop Hang Bar
+		if (funcJoystick.getRawButton(10)) {
+			drop.set(1);
+			drop.setAngle(180);
+		} else {
+			drop.set(0);
+			drop.setAngle(0);
 		}
 
 	}
