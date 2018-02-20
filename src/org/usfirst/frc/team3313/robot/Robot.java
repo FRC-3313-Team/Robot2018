@@ -123,7 +123,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("start " + startTime);
 		while (ds.getGameSpecificMessage().length() == 0) {
 			if (System.currentTimeMillis() >= startTime + 5000) {
-				//System.out.println("end " + System.currentTimeMillis());
+				// System.out.println("end " + System.currentTimeMillis());
 				break;
 			}
 		}
@@ -140,7 +140,7 @@ public class Robot extends IterativeRobot {
 		char switchSide = ' ';
 		char scaleSide = ' ';
 		if (message.length() > 0) {
-			//System.out.println("llamas: " + message.);
+			// System.out.println("llamas: " + message.);
 			switchSide = message.charAt(0);
 			scaleSide = message.charAt(1);
 		}
