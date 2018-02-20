@@ -8,8 +8,6 @@ package org.usfirst.frc.team3313.robot;
 
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.*;
-import edu.wpi.cscore.UsbCamera;
-import edu.wpi.cscore.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -145,7 +143,7 @@ public class Robot extends IterativeRobot {
 			scaleSide = message.charAt(1);
 		}
 		if (message.length() == 0) {
-			drive.driveStraight(.5, 101);
+			drive.driveStraight(.5, 120);
 		} else if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
 			if (selectedAutoDistance == 1) {// If we want to target the switch
 				if (switchSide == 'R') {// If our color is on the right
@@ -330,11 +328,25 @@ public class Robot extends IterativeRobot {
 
 	}
 
-	/**
-	 * This function is called periodically during test mode.
-	 */
+	@Override
+	public void testInit() {
+		System.out.println("Test start square");
+		drive.driveStraight(.25, 24);
+		drive.rotateByDegrees(90, .8);
+		System.out.println("Starting second leg");
+		drive.driveStraight(.25, 24);
+		drive.rotateByDegrees(90, .8);
+		System.out.println("Starting third leg");
+		drive.driveStraight(.25, 24);
+		drive.rotateByDegrees(90, .8);
+		System.out.println("Starting fourth leg");
+		drive.driveStraight(.25, 24);
+		drive.rotateByDegrees(90, .8);
+	}
+
 	@Override
 	public void testPeriodic() {
+		SmartDashboard.putNumber("Euro", drive.getAngle());
 	}
 
 	@Override

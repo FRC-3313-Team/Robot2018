@@ -9,6 +9,8 @@ public class EncodedTankDrive {
 	private Encoder leftEncod;
 	private Encoder rightEncod;
 	private double RIGHT_SCALE = .978;
+	private int FIRST_ANGLE = 60;
+	private int SECOND_ANGLE = 30;
 	double Kp = 0.03;
 
 	public EncodedTankDrive(Spark left, Spark right, Encoder leftEncod, Encoder rightEncod) {
@@ -88,17 +90,48 @@ public class EncodedTankDrive {
 		while (Math.abs(angle - degrees) > 1) {
 			angle = getAngle(); // get current heading
 			if (degrees > 0) {
-				leftMotor.set(speed);
-				rightMotor.set(speed * this.RIGHT_SCALE);
+				if (speed > .6) {
+					if (Math.abs(angle - degrees) < FIRST_ANGLE) {
+						if (Math.abs(angle - degrees) < SECOND_ANGLE) {
+							leftMotor.set(speed / 5);
+							rightMotor.set(speed * this.RIGHT_SCALE / 5);
+						} else {
+							leftMotor.set(speed / 3);
+							rightMotor.set(speed * this.RIGHT_SCALE / 3);
+						}
+					} else {
+						leftMotor.set(speed);
+						rightMotor.set(speed * this.RIGHT_SCALE);
+					}
+				} else {
+					leftMotor.set(speed);
+					rightMotor.set(speed * this.RIGHT_SCALE);
+				}
 			} else {
-				leftMotor.set(-speed);
-				rightMotor.set(-speed * this.RIGHT_SCALE);
+				if (speed > .6) {
+					if (Math.abs(angle - degrees) < FIRST_ANGLE) {
+						if (Math.abs(angle - degrees) < SECOND_ANGLE) {
+							leftMotor.set(-speed / 5);
+							rightMotor.set(-speed * this.RIGHT_SCALE / 5);
+						} else {
+							leftMotor.set(-speed / 3);
+							rightMotor.set(-speed * this.RIGHT_SCALE / 3);
+						}
+					} else {
+						leftMotor.set(-speed);
+						rightMotor.set(-speed * this.RIGHT_SCALE);
+					}
+				} else {
+					leftMotor.set(-speed);
+					rightMotor.set(-speed * this.RIGHT_SCALE);
+				}
 			}
 		}
 		leftMotor.set(0);
 		rightMotor.set(0);
 		while (!this.leftEncod.getStopped() && !rightEncod.getStopped()) {
 		}
+		fixHeading(degrees);
 		return true;
 	}
 
@@ -120,18 +153,21 @@ public class EncodedTankDrive {
 
 	/**
 	 * Attempts to adjust the robots heading.
-	 * @param The angle that was attempted to be reached
-	 * @return Weather an adjustment was needed or not
+	 * 
+	 * @param angleAttempted
+	 *            The angle that was attempted to be reached
+	 * @return Whether an adjustment was needed or not
 	 */
 	public boolean fixHeading(double AngleAttempted) {
-		double d = Robot.gyro.getAngle() - AngleAttempted;
-		if (d < 0) {
+		
+		double d = (double) ((int) ((getAngle() - AngleAttempted) * 100)) / 100;
+		if (d < -.5) {
 			// Robot Needs to turn positive degrees.
-			rotateByDegrees(Math.abs(d), .25);
+			rotateByDegrees(d * -1, .25);
 			return true;
-		} else if (d > 0) {
+		} else if (d > +.5) {
 			// Robot needs to turn negative degrees.
-			rotateByDegrees((d *= -1), .25);
+			rotateByDegrees(d * -1, .25);
 			return true;
 		} else {
 			// Robot somehow managed to stay straight?
@@ -140,11 +176,11 @@ public class EncodedTankDrive {
 	}
 
 	/**
-	 * Attempt to break the motors by setting the speed in the opposite direction
+	 * Attempt to brake the motors by setting the speed in the opposite direction
 	 * for .2 seconds.
 	 * 
-	 * @param The
-	 *            about of force to push back against the motors, too much jerk
+	 * @param force
+	 *            The about of force to push back against the motors, too much jerk
 	 *            could case harm to the motors. USE WITH CAUTION.
 	 */
 	public void brakeMotors(double force) {
