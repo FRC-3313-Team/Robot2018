@@ -33,6 +33,7 @@ public class Robot extends IterativeRobot {
 
 	// Limit Switch
 	DigitalInput stage1UpLimit, stage1DownLimit, stage2UpLimit, stage2DownLimit;
+	AnalogOutput red = new AnalogOutput(0);
 
 	// Joystick
 	Joystick controller = new Joystick(0);
@@ -49,7 +50,7 @@ public class Robot extends IterativeRobot {
 	Talon tilt = new Talon(7); // Intake Tilt
 
 	// Servos
-	Servo drop = new Servo(0);
+	Servo dropBar = new Servo(0);
 
 	// Accelerated Movement May or may not work IDK
 	double incrementSpeed = 0; // DO NOT TOUCH
@@ -68,7 +69,7 @@ public class Robot extends IterativeRobot {
 	private SendableChooser<Integer> autoChooseDistance = new SendableChooser<>();
 	private int selectedAutoDistance;
 
-	private DriverStation ds = DriverStation.getInstance();
+	private DriverStation ds = m_ds;
 
 	/**
 	 * This function is run when the robot is first started up and should be used
@@ -76,6 +77,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
+		red.setVoltage(0);
+
 		drive.tankDrive(0, 0);
 
 		autoChoosePosition.addDefault("Position 1 Auto", 1);
@@ -116,18 +119,27 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
+		long startTime = System.currentTimeMillis();
+		while (ds.getGameSpecificMessage() == "") {
+			if (System.currentTimeMillis() >= startTime + 5000) {
+				break;
+			}
+		}
 		selectedAutoPosition = autoChoosePosition.getSelected();
 		selectedAutoDistance = autoChooseDistance.getSelected();
 
 		tilt.set(-.75);
+		stage2.set(.1);
 		Timer.delay(.2);
 		tilt.set(.3);
+		stage2.set(0);
 
 		String message = ds.getGameSpecificMessage();
 		char switchSide = message.charAt(0);
 		char scaleSide = message.charAt(1);
-
-		if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
+		if (message == "") {
+			drive.driveStraight(.5, 101);
+		} else if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
 			if (selectedAutoDistance == 1) {// If we want to target the switch
 				if (switchSide == 'R') {// If our color is on the right
 					drive.driveStraight(.50, 150);
@@ -286,7 +298,7 @@ public class Robot extends IterativeRobot {
 		} else {
 			if (stage1DownLimit.get()) {
 				stage1.set(0.15); // Change this value as needed to hold power in the motor
-			}else {
+			} else {
 				stage1.set(0);
 			}
 		}
@@ -302,11 +314,11 @@ public class Robot extends IterativeRobot {
 
 		// Drop Hang Bar
 		if (funcJoystick.getRawButton(10)) {
-			drop.set(1);
-			drop.setAngle(180);
+			dropBar.set(1);
+			dropBar.setAngle(180);
 		} else {
-			drop.set(0);
-			drop.setAngle(0);
+			dropBar.set(0);
+			dropBar.setAngle(0);
 		}
 
 	}
@@ -316,6 +328,10 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void testPeriodic() {
+	}
+
+	@Override
+	public void disabledInit() {
 	}
 
 	// FIX DEADZONES
