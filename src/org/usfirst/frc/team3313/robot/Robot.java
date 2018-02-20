@@ -120,8 +120,10 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		long startTime = System.currentTimeMillis();
-		while (ds.getGameSpecificMessage() == "") {
+		System.out.println("start " + startTime);
+		while (ds.getGameSpecificMessage().length() == 0) {
 			if (System.currentTimeMillis() >= startTime + 5000) {
+				//System.out.println("end " + System.currentTimeMillis());
 				break;
 			}
 		}
@@ -129,15 +131,20 @@ public class Robot extends IterativeRobot {
 		selectedAutoDistance = autoChooseDistance.getSelected();
 
 		tilt.set(-.75);
-		stage2.set(.1);
+		stage2.set(.5);
 		Timer.delay(.2);
 		tilt.set(.3);
 		stage2.set(0);
 
 		String message = ds.getGameSpecificMessage();
-		char switchSide = message.charAt(0);
-		char scaleSide = message.charAt(1);
-		if (message == "") {
+		char switchSide = ' ';
+		char scaleSide = ' ';
+		if (message.length() > 0) {
+			//System.out.println("llamas: " + message.);
+			switchSide = message.charAt(0);
+			scaleSide = message.charAt(1);
+		}
+		if (message.length() == 0) {
 			drive.driveStraight(.5, 101);
 		} else if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
 			if (selectedAutoDistance == 1) {// If we want to target the switch
