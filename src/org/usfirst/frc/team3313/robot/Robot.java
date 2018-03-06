@@ -75,7 +75,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		red.setVoltage(0);
+		//red.setVoltage(0);
 
 		drive.tankDrive(0, 0);
 
@@ -119,8 +119,26 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		selectedAutoPosition = autoChoosePosition.getSelected();
 		selectedAutoDistance = autoChooseDistance.getSelected();
-
-		if (selectedAutoPosition == 4) {// If we just want to drive forward
+		if (!autoHasRan) {
+				if (selectedAutoPosition == 4) {
+			drive.driveStraight(.5,100);
+			drive.tankDrive(0, 0);
+			autoHasRan = true;
+			
+		}
+		}
+	}
+	
+	boolean autoHasRan = false;
+	@Override
+	public void autonomousPeriodic() {
+	
+		
+		
+//                                                          REDO EVERYTHING		
+		
+		
+	/*	if (selectedAutoPosition == 4) {// If we just want to drive forward
 			defaultAuto();
 		} else {// If we want an advanced autonomous
 			long startTime = System.currentTimeMillis();
@@ -132,11 +150,11 @@ public class Robot extends IterativeRobot {
 				}
 			}
 
-			tilt.set(-.75);
-			stage2.set(.5);
-			Timer.delay(.2);
-			tilt.set(.3);
-			stage2.set(0);
+		//	tilt.set(-.75);
+		//	stage2.set(.5);
+		//	Timer.delay(.2);
+		//	tilt.set(.3);
+		//	stage2.set(0);
 
 			String message = ds.getGameSpecificMessage();
 			char switchSide = ' ';
@@ -145,90 +163,105 @@ public class Robot extends IterativeRobot {
 				switchSide = message.charAt(0);
 				scaleSide = message.charAt(1);
 			}
-			if (message.length() == 0) {// No game data was received, resort to default auto code
-				defaultAuto();
-			} else if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
-				if (selectedAutoDistance == 1) {// If we want to target the switch
-					if (switchSide == 'R') {// If our color is on the right for the switch DONE
-						drive.driveStraight(.50, 150);
-						drive.rotateByDegrees(-90, .25);
-						autoRaiseStage2();
-						// drive.driveStraight(.25, 20);
-						autoShoot();
-					} else if (scaleSide == 'R') {// If our color is on the right for the scale
-						drive.driveStraight(.55, 261.47);
-						drive.rotateByDegrees(-45, .25);
-						autoRaiseStage1();
-						autoRaiseStage2();
-						autoShoot();
-					} else {// If no options are on our starting side
-						defaultAuto();
+			if(!autoHasRan)
+			{
+				if (message.length() == 0) {// No game data was received, resort to default auto code
+					defaultAuto(); 
+					autoHasRan = true;
+				} else if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
+					if (selectedAutoDistance == 1) {// If we want to target the switch
+						if (switchSide == 'R') {// If our color is on the right for the switch DONE
+							autoRaiseStage2A();
+							drive.driveStraight(.50, 140);
+							drive.rotateByDegrees(-90, .4);
+							autoRaiseStage2();
+							drive.driveStraight(.25, 6);
+							autoShoot();
+							autoHasRan = true;
+						} else if (scaleSide == 'R') {// If our color is on the right for the scale
+							autoRaiseStage2A();
+							drive.driveStraight(.55, 261.47);
+							drive.rotateByDegrees(-45, .25);
+							autoRaiseStage1();
+							autoRaiseStage2();
+							autoShoot();
+						} else {// If no options are on our starting side
+							defaultAuto();
+						}
+					} else {// If we want to target the scale
+						if (scaleSide == 'R') {// If our color is on the right
+							autoRaiseStage2A();
+							drive.driveStraight(.55, 261.47);
+							drive.rotateByDegrees(-45, .4);
+							autoRaiseStage1(); 
+							autoRaiseStage2();
+							autoShoot();
+						} else if (switchSide == 'R') {// If our color is on the right for the switch DONE
+							autoRaiseStage2A();
+							drive.driveStraight(.50, 140);
+							drive.rotateByDegrees(-90, .25);
+							autoRaiseStage2();
+							drive.driveStraight(.25, 20);
+							autoShoot();
+						} else {// If no options are on our starting side
+							defaultAuto();
+						}
 					}
-				} else {// If we want to target the scale
-					if (scaleSide == 'R') {// If our color is on the right
-						drive.driveStraight(.55, 261.47);
-						drive.rotateByDegrees(-45, .25);
-						autoRaiseStage1();
-						autoRaiseStage2();
-						autoShoot();
-					} else if (switchSide == 'R') {// If our color is on the right for the switch DONE
-						drive.driveStraight(.50, 150);
-						drive.rotateByDegrees(-90, .25);
-						autoRaiseStage2();
-						// drive.driveStraight(.25, 20);
-						autoShoot();
-					} else {// If no options are on our starting side
-						defaultAuto();
+				} else if (selectedAutoPosition == 2) { // If we are on the Left Side
+					if (selectedAutoDistance == 1) {// If we want to target the switch
+						if (switchSide == 'L') {// If our color is on the left for the switch DONE
+						autoRaiseStage2A();
+							drive.driveStraight(.50, 140);
+							drive.rotateByDegrees(90, .4);
+							autoRaiseStage2();
+							drive.driveStraight(.25, 6);
+							autoShoot();
+							autoHasRan = true;
+						} else if (scaleSide == 'L') {// If our color is on the left for the scale
+							autoRaiseStage2A();
+							drive.driveStraight(.55, 261.47);
+							drive.rotateByDegrees(45, .25);
+							autoRaiseStage1();
+							autoRaiseStage2();
+							autoShoot();
+						} else {// If no options are on our starting side
+							defaultAuto();
+						}
+					} else {// If we want to target the scale
+						if (scaleSide == 'L') {// If our color is on the left
+							autoRaiseStage2A();
+							drive.driveStraight(.55, 261.47);
+							drive.rotateByDegrees(45, .4);
+							autoRaiseStage1();
+							autoRaiseStage2();
+							autoShoot();
+						} else if (switchSide == 'L') {// If our color is on the left for the switch DONE
+							autoRaiseStage2A();
+							drive.driveStraight(.50, 140);
+							drive.rotateByDegrees(90, .25);
+							autoRaiseStage2();
+							drive.driveStraight(.25, 20);
+							autoShoot();
+						} else {// If no options are on our starting side
+							defaultAuto();
+						}
 					}
-				}
-			} else if (selectedAutoPosition == 2) { // If we are on the Left Side
-				if (selectedAutoDistance == 1) {// If we want to target the switch
-					if (switchSide == 'L') {// If our color is on the left for the switch DONE
-						drive.driveStraight(.50, 150);
-						drive.rotateByDegrees(90, .25);
+				} else if (selectedAutoPosition == 3) {// If we are in the middle
+					drive.driveStraight(.5, 50);
+					if (switchSide == 'R') {// If the switch is on the right
+						tilt.set(.5);
+						Timer.delay(.5);
+						tilt.set(0);
 						autoRaiseStage2();
-						// drive.driveStraight(.25, 20);
+						drive.driveStraight(.5, 37);
 						autoShoot();
-					} else if (scaleSide == 'L') {// If our color is on the left for the scale
-						drive.driveStraight(.55, 261.47);
-						drive.rotateByDegrees(45, .25);
-						autoRaiseStage1();
-						autoRaiseStage2();
-						autoShoot();
-					} else {// If no options are on our starting side
-						defaultAuto();
+					} else {
+						drive.driveStraight(.5, 37);
+						autoHasRan = true;
 					}
-				} else {// If we want to target the scale
-					if (scaleSide == 'L') {// If our color is on the left
-						drive.driveStraight(.55, 261.47);
-						drive.rotateByDegrees(45, .25);
-						autoRaiseStage1();
-						autoRaiseStage2();
-						autoShoot();
-					} else if (switchSide == 'L') {// If our color is on the left for the switch DONE
-						drive.driveStraight(.50, 150);
-						drive.rotateByDegrees(90, .25);
-						autoRaiseStage2();
-						// drive.driveStraight(.25, 20);
-						autoShoot();
-					} else {// If no options are on our starting side
-						defaultAuto();
-					}
-				}
-			} else if (selectedAutoPosition == 3) {// If we are in the middle
-				drive.driveStraight(.5, 50);
-				if (switchSide == 'R') {// If the switch is on the right
-					tilt.set(.5);
-					Timer.delay(.5);
-					tilt.set(0);
-					autoRaiseStage2();
-					drive.driveStraight(.5, 37);
-					autoShoot();
-				} else {
-					drive.driveStraight(.5, 37);
 				}
 			}
-		}
+		}*/
 	}
 
 	/**
@@ -236,14 +269,11 @@ public class Robot extends IterativeRobot {
 	 * have to cross the bump in the field
 	 */
 	public void defaultAuto() {
-		drive.driveStraight(.5, 60);
+		drive.driveStraight(.5, 100);
+		autoHasRan = true;
 	}
-
-	@Override
-	public void autonomousPeriodic() {
-
-	}
-
+	
+	
 	/**
 	 * Used to shoot in auto
 	 */
@@ -255,9 +285,16 @@ public class Robot extends IterativeRobot {
 		intakeR.set(0);
 		tilt.set(0);
 	}
+	
+	public void autoRaiseStage2A() {
+		stage2.set(1);
+		Timer.delay(.1);
+		stage2.set(0);
+	}
 
 	public void autoRaiseStage2() {
 		stage2.set(1);
+		//Timer.delay(.5);
 		while (stage2UpLimit.get()) {
 		}
 		stage2.set(0);
@@ -269,7 +306,7 @@ public class Robot extends IterativeRobot {
 		}
 		stage1.set(0);
 	}
-
+ 
 	@Override
 	public void teleopInit() {
 	}
@@ -283,6 +320,7 @@ public class Robot extends IterativeRobot {
 		// Button map: A-1 B-2 X-3 Y-4 BumperR-5 BumperL-6 Back-7 Start-8
 		advancedDrive(-controller.getX(), controller.getRawAxis(5));
 		// Shuffleboard
+
 		SmartDashboard.putBoolean("Stage one: Up", stage1UpLimit.get());
 		SmartDashboard.putBoolean("Stage one: Down", stage1DownLimit.get());
 		SmartDashboard.putBoolean("Stage two: Up", stage2UpLimit.get());
@@ -301,10 +339,15 @@ public class Robot extends IterativeRobot {
 		} else if (controller.getRawButton(5)) {
 			intakeL.set(-joyZ);
 			intakeR.set(-joyZ);
-		} else {
+		}else if (funcJoystick.getRawButton(1)) {
+			intakeL.set(-joyZ);
+			intakeR.set(-joyZ);
+		}
+		 else {
 			intakeL.set(0);
 			intakeR.set(0);
 		}
+		
 		// Tilt
 		if (funcJoystick.getRawButton(5)) {
 			tilt.set(.5);
