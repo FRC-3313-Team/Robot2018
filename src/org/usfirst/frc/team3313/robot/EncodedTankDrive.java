@@ -74,104 +74,24 @@ public class EncodedTankDrive {
 		return true;
 	}
 
-	/**
-	 * Drives to a specific rotation at a specified speed.
-	 *
-	 * @param degrees
-	 *            How much to turn by. Positive values are clockwise; negative are
-	 *            anti-clockwise
-	 * @param speed
-	 *            How fast to turn. We usually use .25
-	 * @return
-	 */
-	public boolean rotateByDegrees(double degrees, double speed) {
-		Robot.gyro.reset();
-		double angle = getAngle();
-		while (Math.abs(angle - degrees) > 1) {
-			angle = getAngle(); // get current heading
-			if (degrees > 0) {
-				if (speed > .6) {
-					if (Math.abs(angle - degrees) < FIRST_ANGLE) {
-						if (Math.abs(angle - degrees) < SECOND_ANGLE) {
-							leftMotor.set(speed / 5);
-							rightMotor.set(speed * this.RIGHT_SCALE / 5);
-						} else {
-							leftMotor.set(speed / 3);
-							rightMotor.set(speed * this.RIGHT_SCALE / 3);
-						}
-					} else {
-						leftMotor.set(speed);
-						rightMotor.set(speed * this.RIGHT_SCALE);
-					}
-				} else {
-					leftMotor.set(speed);
-					rightMotor.set(speed * this.RIGHT_SCALE);
-				}
-			} else {
-				if (speed > .6) {
-					if (Math.abs(angle - degrees) < FIRST_ANGLE) {
-						if (Math.abs(angle - degrees) < SECOND_ANGLE) {
-							leftMotor.set(-speed / 5);
-							rightMotor.set(-speed * this.RIGHT_SCALE / 5);
-						} else {
-							leftMotor.set(-speed / 3);
-							rightMotor.set(-speed * this.RIGHT_SCALE / 3);
-						}
-					} else {
-						leftMotor.set(-speed);
-						rightMotor.set(-speed * this.RIGHT_SCALE);
-					}
-				} else {
-					leftMotor.set(-speed);
-					rightMotor.set(-speed * this.RIGHT_SCALE);
-				}
+	public void driveTurn(double speed, double distance) {
+		leftEncod.reset();
+		rightEncod.reset();
+		leftMotor.set(speed);
+		rightMotor.set(speed * RIGHT_SCALE);
+		boolean left = false;
+		boolean right = true;
+		while (!(left == right == true)) {
+			if (Math.abs(leftEncod.getDistance()) >= distance) {
+				leftMotor.set(0);
+				rightMotor.set(0);
+				left = true;
 			}
 		}
 		leftMotor.set(0);
 		rightMotor.set(0);
+
 		while (!this.leftEncod.getStopped() && !rightEncod.getStopped()) {
-		}
-		fixHeading(degrees);
-		return true;
-	}
-
-	/**
-	 * Wraps the gyro output to a range of -360 to +360
-	 * 
-	 * @return the wrapped angle
-	 */
-	public double getAngle() {
-		double angle = Robot.gyro.getAngle();
-		while (angle > 360) {
-			angle -= 360;
-		}
-		while (angle < -360) {
-			angle += 360;
-		}
-		return angle;
-	}
-
-	/**
-	 * Attempts to adjust the robots heading.
-	 * 
-	 * @param angleAttempted
-	 *            The angle that was attempted to be reached
-	 * @return Whether an adjustment was needed or not
-	 */
-	public boolean fixHeading(double AngleAttempted) {
-		
-		double d = (double) ((int) ((getAngle() - AngleAttempted) * 100)) / 100;
-		if (d < -.5) {
-			// Robot Needs to turn positive degrees.
-			rotateByDegrees(d * -1, .25);
-			return true;
-		} else if (d > +.5) {
-			// Robot needs to turn negative degrees.
-			rotateByDegrees(d * -1, .25);
-			return true;
-		} else {
-			// Robot somehow managed to stay straight?
-			return false;
 		}
 	}
 

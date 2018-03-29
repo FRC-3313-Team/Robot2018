@@ -38,7 +38,7 @@ public class Robot extends IterativeRobot {
 	Joystick funcJoystick = new Joystick(1);
 
 	// Gyro that is attached directly to the RIO
-	static ADXRS450_Gyro gyro;
+	// static ADXRS450_Gyro gyro;
 
 	// Talons
 	Talon stage2 = new Talon(3); // Stage 2 lift
@@ -75,7 +75,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		//red.setVoltage(0);
+		// red.setVoltage(0);
 
 		drive.tankDrive(0, 0);
 
@@ -104,8 +104,8 @@ public class Robot extends IterativeRobot {
 		encodeLeft.setDistancePerPulse(.05236111111);
 		encodeRight.setDistancePerPulse(.05236111111); // .05236111111
 
-		gyro = new ADXRS450_Gyro();
-		gyro.reset();
+		// gyro = new ADXRS450_Gyro();
+		// gyro.reset();
 		// ShuffleBoard Stuff
 		// Autonomous Stuff
 	}
@@ -119,26 +119,27 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		selectedAutoPosition = autoChoosePosition.getSelected();
 		selectedAutoDistance = autoChooseDistance.getSelected();
+
+		selectedAutoPosition = 1;//right
+		selectedAutoDistance = 1;//close
 		if (!autoHasRan) {
-				if (selectedAutoPosition == 4) {
-			drive.driveStraight(.5,100);
-			drive.tankDrive(0, 0);
-			autoHasRan = true;
-			
-		}
+			if (selectedAutoPosition == 4) {
+				drive.driveStraight(.5, 100);
+				drive.tankDrive(0, 0);
+				autoHasRan = true;
+
+			}
 		}
 	}
-	
+
 	boolean autoHasRan = false;
+
 	@Override
 	public void autonomousPeriodic() {
-	
-		
-		
-//                                                          REDO EVERYTHING		
-		
-		
-	/*	if (selectedAutoPosition == 4) {// If we just want to drive forward
+
+		// REDO EVERYTHING
+
+		if (selectedAutoPosition == 4) {// If we just want to drive forward
 			defaultAuto();
 		} else {// If we want an advanced autonomous
 			long startTime = System.currentTimeMillis();
@@ -150,11 +151,11 @@ public class Robot extends IterativeRobot {
 				}
 			}
 
-		//	tilt.set(-.75);
-		//	stage2.set(.5);
-		//	Timer.delay(.2);
-		//	tilt.set(.3);
-		//	stage2.set(0);
+			// tilt.set(-.75);
+			// stage2.set(.5);
+			// Timer.delay(.2);
+			// tilt.set(.3);
+			// stage2.set(0);
 
 			String message = ds.getGameSpecificMessage();
 			char switchSide = ' ';
@@ -163,43 +164,28 @@ public class Robot extends IterativeRobot {
 				switchSide = message.charAt(0);
 				scaleSide = message.charAt(1);
 			}
-			if(!autoHasRan)
-			{
+			if (!autoHasRan) {
 				if (message.length() == 0) {// No game data was received, resort to default auto code
-					defaultAuto(); 
+					defaultAuto();
 					autoHasRan = true;
 				} else if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
 					if (selectedAutoDistance == 1) {// If we want to target the switch
 						if (switchSide == 'R') {// If our color is on the right for the switch DONE
 							autoRaiseStage2A();
 							drive.driveStraight(.50, 140);
-							drive.rotateByDegrees(-90, .4);
+							drive.driveTurn(-.5, 17.2);
 							autoRaiseStage2();
 							drive.driveStraight(.25, 6);
 							autoShoot();
 							autoHasRan = true;
-						} else if (scaleSide == 'R') {// If our color is on the right for the scale
-							autoRaiseStage2A();
-							drive.driveStraight(.55, 261.47);
-							drive.rotateByDegrees(-45, .25);
-							autoRaiseStage1();
-							autoRaiseStage2();
-							autoShoot();
 						} else {// If no options are on our starting side
 							defaultAuto();
 						}
 					} else {// If we want to target the scale
-						if (scaleSide == 'R') {// If our color is on the right
-							autoRaiseStage2A();
-							drive.driveStraight(.55, 261.47);
-							drive.rotateByDegrees(-45, .4);
-							autoRaiseStage1(); 
-							autoRaiseStage2();
-							autoShoot();
-						} else if (switchSide == 'R') {// If our color is on the right for the switch DONE
+						if (switchSide == 'R') {// If our color is on the right for the switch DONE
 							autoRaiseStage2A();
 							drive.driveStraight(.50, 140);
-							drive.rotateByDegrees(-90, .25);
+							drive.driveTurn(-.5, 17.2);
 							autoRaiseStage2();
 							drive.driveStraight(.25, 20);
 							autoShoot();
@@ -210,35 +196,21 @@ public class Robot extends IterativeRobot {
 				} else if (selectedAutoPosition == 2) { // If we are on the Left Side
 					if (selectedAutoDistance == 1) {// If we want to target the switch
 						if (switchSide == 'L') {// If our color is on the left for the switch DONE
-						autoRaiseStage2A();
+							autoRaiseStage2A();
 							drive.driveStraight(.50, 140);
-							drive.rotateByDegrees(90, .4);
+							drive.driveTurn(.5, 17.2);
 							autoRaiseStage2();
 							drive.driveStraight(.25, 6);
 							autoShoot();
 							autoHasRan = true;
-						} else if (scaleSide == 'L') {// If our color is on the left for the scale
-							autoRaiseStage2A();
-							drive.driveStraight(.55, 261.47);
-							drive.rotateByDegrees(45, .25);
-							autoRaiseStage1();
-							autoRaiseStage2();
-							autoShoot();
-						} else {// If no options are on our starting side
+						} else  {// If no options are on our starting side
 							defaultAuto();
 						}
 					} else {// If we want to target the scale
-						if (scaleSide == 'L') {// If our color is on the left
-							autoRaiseStage2A();
-							drive.driveStraight(.55, 261.47);
-							drive.rotateByDegrees(45, .4);
-							autoRaiseStage1();
-							autoRaiseStage2();
-							autoShoot();
-						} else if (switchSide == 'L') {// If our color is on the left for the switch DONE
+						if (switchSide == 'L') {// If our color is on the left for the switch DONE
 							autoRaiseStage2A();
 							drive.driveStraight(.50, 140);
-							drive.rotateByDegrees(90, .25);
+							drive.driveTurn(.5, 17.2);
 							autoRaiseStage2();
 							drive.driveStraight(.25, 20);
 							autoShoot();
@@ -247,21 +219,11 @@ public class Robot extends IterativeRobot {
 						}
 					}
 				} else if (selectedAutoPosition == 3) {// If we are in the middle
-					drive.driveStraight(.5, 50);
-					if (switchSide == 'R') {// If the switch is on the right
-						tilt.set(.5);
-						Timer.delay(.5);
-						tilt.set(0);
-						autoRaiseStage2();
-						drive.driveStraight(.5, 37);
-						autoShoot();
-					} else {
-						drive.driveStraight(.5, 37);
-						autoHasRan = true;
-					}
+					defaultAuto();
 				}
+				autoHasRan = true;
 			}
-		}*/
+		}
 	}
 
 	/**
@@ -270,10 +232,8 @@ public class Robot extends IterativeRobot {
 	 */
 	public void defaultAuto() {
 		drive.driveStraight(.5, 100);
-		autoHasRan = true;
 	}
-	
-	
+
 	/**
 	 * Used to shoot in auto
 	 */
@@ -285,7 +245,7 @@ public class Robot extends IterativeRobot {
 		intakeR.set(0);
 		tilt.set(0);
 	}
-	
+
 	public void autoRaiseStage2A() {
 		stage2.set(1);
 		Timer.delay(.1);
@@ -294,7 +254,7 @@ public class Robot extends IterativeRobot {
 
 	public void autoRaiseStage2() {
 		stage2.set(1);
-		//Timer.delay(.5);
+		// Timer.delay(.5);
 		while (stage2UpLimit.get()) {
 		}
 		stage2.set(0);
@@ -306,7 +266,7 @@ public class Robot extends IterativeRobot {
 		}
 		stage1.set(0);
 	}
- 
+
 	@Override
 	public void teleopInit() {
 	}
@@ -327,7 +287,6 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putBoolean("Stage two: Down", stage2DownLimit.get());
 		SmartDashboard.putNumber("Left Pulses", encodeLeft.get());
 		SmartDashboard.putNumber("Right Pulses", encodeRight.get());
-		SmartDashboard.putNumber("Euro", drive.getAngle());
 		SmartDashboard.putString("Game Message", ds.getGameSpecificMessage());
 		SmartDashboard.putNumber("ATK Z", -funcJoystick.getZ());
 
@@ -339,15 +298,14 @@ public class Robot extends IterativeRobot {
 		} else if (controller.getRawButton(5)) {
 			intakeL.set(-joyZ);
 			intakeR.set(-joyZ);
-		}else if (funcJoystick.getRawButton(1)) {
+		} else if (funcJoystick.getRawButton(1)) {
 			intakeL.set(-joyZ);
 			intakeR.set(-joyZ);
-		}
-		 else {
+		} else {
 			intakeL.set(0);
 			intakeR.set(0);
 		}
-		
+
 		// Tilt
 		if (funcJoystick.getRawButton(5)) {
 			tilt.set(.5);
@@ -391,25 +349,20 @@ public class Robot extends IterativeRobot {
 
 	}
 
+	boolean first = true;
+
 	@Override
 	public void testInit() {
-		System.out.println("Test start square");
-		drive.driveStraight(.25, 24);
-		drive.rotateByDegrees(90, .8);
-		System.out.println("Starting second leg");
-		drive.driveStraight(.25, 24);
-		drive.rotateByDegrees(90, .8);
-		System.out.println("Starting third leg");
-		drive.driveStraight(.25, 24);
-		drive.rotateByDegrees(90, .8);
-		System.out.println("Starting fourth leg");
-		drive.driveStraight(.25, 24);
-		drive.rotateByDegrees(90, .8);
+		first = true;
 	}
 
 	@Override
 	public void testPeriodic() {
-		SmartDashboard.putNumber("Euro", drive.getAngle());
+		if (first) {
+			first = false;
+			defaultAuto();
+		}
+
 	}
 
 	@Override
