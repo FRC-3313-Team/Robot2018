@@ -1,4 +1,5 @@
 /*----------------------------------------------------------------------------*/
+
 /* Copyright (c) 2017-2018 FIRST. All Rights Reserved.						*/
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
@@ -292,7 +293,7 @@ public class Robot extends IterativeRobot {
 
 		double joyZ = (funcJoystick.getZ() * -0.5) + 0.5;
 		// Intake
-	/*	if (controller.getRawButton(6)) {
+		if (controller.getRawButton(6)) {
 			intakeL.set(joyZ);
 			intakeR.set(joyZ);
 		} else if (controller.getRawButton(5)) {
@@ -305,7 +306,7 @@ public class Robot extends IterativeRobot {
 			intakeL.set(0);
 			intakeR.set(0);
 		}
-*/
+
 		// Tilt
 		if (funcJoystick.getRawButton(5)) {
 			tilt.set(.5);
@@ -331,9 +332,9 @@ public class Robot extends IterativeRobot {
 
 		// Stage two lift
 		//changed to controller only control
-		if (controller.getRawButton(5) && stage2UpLimit.get()) { // Digital Output 3
+		if (funcJoystick.getRawButton(3) && stage2UpLimit.get()) { // Digital Output 3
 			stage2.set(1); // Up
-		} else if (controller.getRawButton(6) && stage2DownLimit.get()) {
+		} else if (funcJoystick.getRawButton(2) && stage2DownLimit.get()) {
 			stage2.set(-.6); // Down
 		} else {
 			stage2.set(0); // Change this value as needed to hold power in the motor
