@@ -74,14 +74,19 @@ public class EncodedTankDrive {
 		return true;
 	}
 
+	/**
+	 * Make a turn without any forward motion
+	 * 
+	 * @param speed The amount of force applied to the motors; ranges from 0 to 1
+	 * @param distance How long to turn for. Due to the gyroscope not functioning properly, this is mostly trial and error
+	 */
 	public void driveTurn(double speed, double distance) {
 		leftEncod.reset();
 		rightEncod.reset();
 		leftMotor.set(speed);
 		rightMotor.set(speed * RIGHT_SCALE);
 		boolean left = false;
-		boolean right = true;
-		while (!(left == right == true)) {
+		while (!(left == true)) {
 			if (Math.abs(leftEncod.getDistance()) >= distance) {
 				leftMotor.set(0);
 				rightMotor.set(0);

@@ -18,9 +18,6 @@ import edu.wpi.first.wpilibj.smartdashboard.*;
  */
 public class Robot extends IterativeRobot {
 
-	// Camera
-	// +CheesyVisionServer server = CheesyVisionServer.getInstance();
-	// public final int listenPort = 1180;
 	// Encoder stuff
 	Encoder encodeRight = new Encoder(9, 8, true, Encoder.EncodingType.k1X);
 	Encoder encodeLeft = new Encoder(7, 6, false, Encoder.EncodingType.k1X);
@@ -36,9 +33,6 @@ public class Robot extends IterativeRobot {
 	// Joystick
 	Joystick controller = new Joystick(0);
 	Joystick funcJoystick = new Joystick(1);
-
-	// Gyro that is attached directly to the RIO
-	// static ADXRS450_Gyro gyro;
 
 	// Talons
 	Talon stage2 = new Talon(3); // Stage 2 lift
@@ -89,11 +83,6 @@ public class Robot extends IterativeRobot {
 		autoChooseDistance.addObject("Prefer Scale", 2);
 		SmartDashboard.putData("Auto Distance", autoChooseDistance);
 
-		// Camera
-		// UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-		// camera.setResolution(640, 480);
-		// CameraServer.getInstance().startAutomaticCapture();
-
 		// Limit Switch
 		stage1UpLimit = new DigitalInput(0);
 		stage1DownLimit = new DigitalInput(1);
@@ -103,11 +92,6 @@ public class Robot extends IterativeRobot {
 		// double x = new Float(.05236111111);
 		encodeLeft.setDistancePerPulse(.05236111111);
 		encodeRight.setDistancePerPulse(.05236111111); // .05236111111
-
-		// gyro = new ADXRS450_Gyro();
-		// gyro.reset();
-		// ShuffleBoard Stuff
-		// Autonomous Stuff
 	}
 
 	/**
@@ -137,8 +121,6 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousPeriodic() {
 
-		// REDO EVERYTHING
-
 		if (selectedAutoPosition == 4) {// If we just want to drive forward
 			defaultAuto();
 		} else {// If we want an advanced autonomous
@@ -146,17 +128,9 @@ public class Robot extends IterativeRobot {
 			System.out.println("start " + startTime);
 			while (ds.getGameSpecificMessage().length() == 0) {
 				if (System.currentTimeMillis() >= startTime + 5000) {// Wait up to 5 seconds for game data
-					// System.out.println("end " + System.currentTimeMillis());
 					break;
 				}
 			}
-
-			// tilt.set(-.75);
-			// stage2.set(.5);
-			// Timer.delay(.2);
-			// tilt.set(.3);
-			// stage2.set(0);
-
 			String message = ds.getGameSpecificMessage();
 			char switchSide = ' ';
 			char scaleSide = ' ';
@@ -170,7 +144,7 @@ public class Robot extends IterativeRobot {
 					autoHasRan = true;
 				} else if (selectedAutoPosition == 1) {// If we are in position 1 (right side)
 					if (selectedAutoDistance == 1) {// If we want to target the switch
-						if (switchSide == 'R') {// If our color is on the right for the switch DONE
+						if (switchSide == 'R') {// If our color is on the right for the switch
 							autoRaiseStage2A();
 							drive.driveStraight(.50, 140);
 							drive.driveTurn(-.5, 17.2);
@@ -182,7 +156,7 @@ public class Robot extends IterativeRobot {
 							defaultAuto();
 						}
 					} else {// If we want to target the scale
-						if (switchSide == 'R') {// If our color is on the right for the switch DONE
+						if (switchSide == 'R') {// If our color is on the right for the switch
 							autoRaiseStage2A();
 							drive.driveStraight(.50, 140);
 							drive.driveTurn(-.5, 17.2);
@@ -195,7 +169,7 @@ public class Robot extends IterativeRobot {
 					}
 				} else if (selectedAutoPosition == 2) { // If we are on the Left Side
 					if (selectedAutoDistance == 1) {// If we want to target the switch
-						if (switchSide == 'L') {// If our color is on the left for the switch DONE
+						if (switchSide == 'L') {// If our color is on the left for the switch
 							autoRaiseStage2A();
 							drive.driveStraight(.50, 140);
 							drive.driveTurn(.5, 17.2);
@@ -207,7 +181,7 @@ public class Robot extends IterativeRobot {
 							defaultAuto();
 						}
 					} else {// If we want to target the scale
-						if (switchSide == 'L') {// If our color is on the left for the switch DONE
+						if (switchSide == 'L') {// If our color is on the left for the switch
 							autoRaiseStage2A();
 							drive.driveStraight(.50, 140);
 							drive.driveTurn(.5, 17.2);
@@ -235,7 +209,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	/**
-	 * Used to shoot in auto
+	 * Makes 1 shot attempt, should only be called in autonomous
 	 */
 	public void autoShoot() {
 		intakeL.set(-.5);
@@ -265,10 +239,6 @@ public class Robot extends IterativeRobot {
 		while (stage1UpLimit.get()) {
 		}
 		stage1.set(0);
-	}
-
-	@Override
-	public void teleopInit() {
 	}
 
 	/**
@@ -364,12 +334,7 @@ public class Robot extends IterativeRobot {
 		}
 
 	}
-
-	@Override
-	public void disabledInit() {
-	}
-
-	// FIX DEADZONES
+	
 	private void advancedDrive(double rightStick, double leftStick) {
 		// rightStick uses Y axis, leftStick uses rawAxis(5)
 		if (rightStick == 0 && leftStick == 0) {
@@ -381,14 +346,9 @@ public class Robot extends IterativeRobot {
 			}
 			return;
 		}
-		rightStick = -rightStick * .5; // Invert
+		rightStick *= -0.5; // Invert
 		if (respectMax) {
 			double respectedValue = ((rightStick / 100) * maxSpeed); // New Respected speed
-			// if (controller.getRawButton(5)) { // Ignore the advanced drive
-			// drive.tankDrive(-(controller.getY() / 1.25) + (-controller.getRawAxis(5) /
-			// 2),
-			// (-controller.getY() / 1.25) + -(-controller.getRawAxis(5) / 2));
-			// }
 			if (currentSpeed != ticksTillFullSpeed) {
 				currentSpeed++; // Calculate the next tick speed based off maxSpeed / ticksTillFullSpeed
 				if (respectedValue <= (incrementSpeed * currentSpeed)) {
@@ -400,8 +360,6 @@ public class Robot extends IterativeRobot {
 			} else {
 				drive.tankDrive(respectedValue + (-leftStick / 2), respectedValue + (leftStick / 2));
 			}
-			// double acclerationValue = (respectedValue / ticksTillFullSpeed) *
-			// currentSpeed;
 		}
 	}
 }
