@@ -104,8 +104,8 @@ public class Robot extends IterativeRobot {
 		selectedAutoPosition = autoChoosePosition.getSelected();
 		selectedAutoDistance = autoChooseDistance.getSelected();
 
-		selectedAutoPosition = 1;//right
-		selectedAutoDistance = 1;//close
+		selectedAutoPosition = 1;// right
+		selectedAutoDistance = 1;// close
 		if (!autoHasRan) {
 			if (selectedAutoPosition == 4) {
 				drive.driveStraight(.5, 100);
@@ -177,7 +177,7 @@ public class Robot extends IterativeRobot {
 							drive.driveStraight(.25, 6);
 							autoShoot();
 							autoHasRan = true;
-						} else  {// If no options are on our starting side
+						} else {// If no options are on our starting side
 							defaultAuto();
 						}
 					} else {// If we want to target the scale
@@ -334,7 +334,7 @@ public class Robot extends IterativeRobot {
 		}
 
 	}
-	
+
 	private void advancedDrive(double rightStick, double leftStick) {
 		// rightStick uses Y axis, leftStick uses rawAxis(5)
 		if (rightStick == 0 && leftStick == 0) {

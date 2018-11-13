@@ -9,8 +9,6 @@ public class EncodedTankDrive {
 	private Encoder leftEncod;
 	private Encoder rightEncod;
 	private double RIGHT_SCALE = .978;
-	private int FIRST_ANGLE = 60;
-	private int SECOND_ANGLE = 30;
 	double Kp = 0.03;
 
 	public EncodedTankDrive(Spark left, Spark right, Encoder leftEncod, Encoder rightEncod) {
@@ -30,10 +28,8 @@ public class EncodedTankDrive {
 
 	/**
 	 *
-	 * @param speed
-	 *            between -1.0 and 1.0
-	 * @param distance
-	 *            in inches, limit to 1 decimal place
+	 * @param speed    between -1.0 and 1.0
+	 * @param distance in inches, limit to 1 decimal place
 	 * @return true
 	 */
 	public boolean driveStraight(double speed, double distance) {
@@ -42,8 +38,7 @@ public class EncodedTankDrive {
 		leftMotor.set(speed);
 		rightMotor.set(-speed * RIGHT_SCALE);
 		boolean left = false;
-		boolean right = true;
-		while (!(left == right == true)) {
+		while (!(left == true)) {
 			if (Math.abs(leftEncod.getDistance()) >= ((distance / 4) * 3)) {
 				if (Math.abs(leftEncod.getDistance()) >= ((distance / 10) * 9)) {
 					if (speed > .75) {
@@ -61,10 +56,6 @@ public class EncodedTankDrive {
 				leftMotor.set(0);
 				left = true;
 			}
-			// if (Math.abs(rightEncod.getDistance()) >= distance) {
-			// rightMotor.set(0);
-			// right = true;
-			// }
 		}
 		leftMotor.set(0);
 		rightMotor.set(0);
@@ -77,8 +68,9 @@ public class EncodedTankDrive {
 	/**
 	 * Make a turn without any forward motion
 	 * 
-	 * @param speed The amount of force applied to the motors; ranges from 0 to 1
-	 * @param distance How long to turn for. Due to the gyroscope not functioning properly, this is mostly trial and error
+	 * @param speed    The amount of force applied to the motors; ranges from 0 to 1
+	 * @param distance How long to turn for. Due to the gyroscope not functioning
+	 *                 properly, this is mostly trial and error
 	 */
 	public void driveTurn(double speed, double distance) {
 		leftEncod.reset();
@@ -104,9 +96,8 @@ public class EncodedTankDrive {
 	 * Attempt to brake the motors by setting the speed in the opposite direction
 	 * for .2 seconds.
 	 * 
-	 * @param force
-	 *            The about of force to push back against the motors, too much jerk
-	 *            could case harm to the motors. USE WITH CAUTION.
+	 * @param force The about of force to push back against the motors, too much
+	 *              jerk could case harm to the motors. USE WITH CAUTION.
 	 */
 	public void brakeMotors(double force) {
 		rightMotor.set(rightMotor.get() > 0 ? -force : force);
