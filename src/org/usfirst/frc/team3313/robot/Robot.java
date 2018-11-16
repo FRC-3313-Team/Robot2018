@@ -129,10 +129,8 @@ public class Robot extends IterativeRobot {
 			}
 			String message = ds.getGameSpecificMessage();
 			char switchSide = ' ';
-			char scaleSide = ' ';
 			if (message.length() > 0) {// Easiest way to check if invalid/no game data received
 				switchSide = message.charAt(0);
-				scaleSide = message.charAt(1);
 			}
 			if (!autoHasRan) {
 				if (message.length() == 0) {// No game data was received, resort to default auto code
@@ -255,11 +253,11 @@ public class Robot extends IterativeRobot {
 		double joyZ = (funcJoystick.getZ() * -0.5) + 0.5;
 		// Intake
 		if (controller.getRawButton(6)) {
-			intakeL.set(joyZ);
-			intakeR.set(joyZ);
+			intakeL.set(1);
+			intakeR.set(1);
 		} else if (controller.getRawButton(5)) {
-			intakeL.set(-joyZ);
-			intakeR.set(-joyZ);
+			intakeL.set(-1);
+			intakeR.set(-1);
 		} else if (funcJoystick.getRawButton(1)) {
 			intakeL.set(-joyZ);
 			intakeR.set(-joyZ);
