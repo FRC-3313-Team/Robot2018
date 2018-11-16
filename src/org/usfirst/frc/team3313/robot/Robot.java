@@ -27,17 +27,16 @@ public class Robot extends IterativeRobot {
 	EncodedTankDrive drive = new EncodedTankDrive(new Spark(8), new Spark(9), encodeLeft, encodeRight);
 
 	// Limit Switch
+	DigitalInput stage1UpLimit, stage1DownLimit, stage2UpLimit, stage2DownLimit;
 	AnalogOutput red = new AnalogOutput(0);
 
 	// Joystick
 	Joystick controller = new Joystick(0);
 	Joystick funcJoystick = new Joystick(1);
 
-	// Lift Stages
-	LimitedMotor stage1 = new LimitedMotor(4, 0, 1);
-	LimitedMotor stage2 = new LimitedMotor(3, 2, 3);
-
 	// Talons
+	Talon stage2 = new Talon(3); // Stage 2 lift
+	Talon stage1 = new Talon(4); // Stage 1 lift
 	Talon intakeL = new Talon(5); // Intake L
 	Talon intakeR = new Talon(6); // Intake R
 	Talon tilt = new Talon(7); // Intake Tilt
@@ -84,6 +83,11 @@ public class Robot extends IterativeRobot {
 		autoChooseDistance.addObject("Prefer Scale", 2);
 		SmartDashboard.putData("Auto Distance", autoChooseDistance);
 
+		// Limit Switch
+		stage1UpLimit = new DigitalInput(0);
+		stage1DownLimit = new DigitalInput(1);
+		stage2UpLimit = new DigitalInput(3);
+		stage2DownLimit = new DigitalInput(2);
 		// Magic numbers - just ignore this
 		// double x = new Float(.05236111111);
 		encodeLeft.setDistancePerPulse(.05236111111);
@@ -223,14 +227,14 @@ public class Robot extends IterativeRobot {
 	public void autoRaiseStage2() {
 		stage2.set(1);
 		// Timer.delay(.5);
-		while (stage2.getUpper()) {
+		while (stage2UpLimit.get()) {
 		}
 		stage2.set(0);
 	}
 
 	public void autoRaiseStage1() {
 		stage1.set(.5);
-		while (stage1.getUpper()) {
+		while (stage1UpLimit.get()) {
 		}
 		stage1.set(0);
 	}
@@ -245,6 +249,10 @@ public class Robot extends IterativeRobot {
 		advancedDrive(-controller.getX(), controller.getRawAxis(5));
 		// Shuffleboard
 
+		SmartDashboard.putBoolean("Stage one: Up", stage1UpLimit.get());
+		SmartDashboard.putBoolean("Stage one: Down", stage1DownLimit.get());
+		SmartDashboard.putBoolean("Stage two: Up", stage2UpLimit.get());
+		SmartDashboard.putBoolean("Stage two: Down", stage2DownLimit.get());
 		SmartDashboard.putNumber("Left Pulses", encodeLeft.get());
 		SmartDashboard.putNumber("Right Pulses", encodeRight.get());
 		SmartDashboard.putString("Game Message", ds.getGameSpecificMessage());
@@ -277,18 +285,22 @@ public class Robot extends IterativeRobot {
 		}
 
 		// Stage one lift
-
-		if (funcJoystick.getRawButton(6)) {
+		if (funcJoystick.getRawButton(6) && stage1UpLimit.get()) { // Digital Input 0
 			stage1.set(-1); // Up
-		} else if (funcJoystick.getRawButton(7)) { // Digital Input 2
+		} else if (funcJoystick.getRawButton(7) && stage1DownLimit.get()) { // Digital Input 2
 			stage1.set(1); // Down
 		} else {
-			stage1.set(0.15);
+			if (stage1DownLimit.get()) {
+				stage1.set(0.15); // Change this value as needed to hold power in the motor
+			} else {
+				stage1.set(0);
+			}
 		}
 
-		if (funcJoystick.getRawButton(3)) { // Digital Output 3
+		// Stage two lift
+		if (funcJoystick.getRawButton(3) && stage2UpLimit.get()) { // Digital Output 3
 			stage2.set(1); // Up
-		} else if (funcJoystick.getRawButton(2)) {
+		} else if (funcJoystick.getRawButton(2) && stage2DownLimit.get()) {
 			stage2.set(-.6); // Down
 		} else {
 			stage2.set(0); // Change this value as needed to hold power in the motor
